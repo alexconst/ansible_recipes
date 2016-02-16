@@ -1,0 +1,23 @@
+---
+# This playbook only has one play
+# And it applies to all hosts in the inventory file
+- hosts: all
+  # we need priviledge escalation to install software, so we become root
+  become: yes
+  # and we become root using sudo
+  become_method: sudo
+  # to perform the following tasks:
+  # (and tasks should always have a name)
+  tasks:
+    - name: Update package listing cache
+      # use the Ansible apt module to:
+      # update package list, but don't upgrade the system
+      apt: update_cache=yes upgrade=no cache_valid_time=1800
+
+    - name: Install package
+      # use the Ansible apt module to:
+      # install the listed packages to the latest available version
+      apt: pkg={{ item }} state=latest
+      with_items:
+        - htop
+
