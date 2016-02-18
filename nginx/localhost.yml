@@ -10,6 +10,10 @@
 # NOTE: this should be used only in a trusted local environment. Otherwise you
 # may be making yourself vulnerable to MitM attacks.
 #
+# NOTE: this could now be simplified into a single task, but considering the
+# iteration that went on this, simple is better than smart (and some nice tricks
+# would be lost in the process as well).
+#
 - hosts: localhost
   gather_facts: no
   vars:
