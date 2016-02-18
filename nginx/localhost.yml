@@ -1,28 +1,22 @@
 ---
 # This playbook refreshes local SSH key fingerprints, that keep changing when
-# using Vagrant environments. Initially based on:
-# https://juriansluiman.nl/article/151/managing-ssh-known-hosts-with-ansible
-# But then I shifted to Ansible modules.
+# using Vagrant environments.
+#
+# To run the playbook on your localhost:
+#   ansible-playbook localhost.yml
+# Or to avoid any warnings:
+#   ansible-playbook -i localhost.ini localhost.yml
 #
 # NOTE: this should be used only in a trusted local environment. Otherwise you
 # may be making yourself vulnerable to MitM attacks.
 #
-# To run the playbook on your localhost, pick one from:
-#   ansible-playbook localhost.yml
-#   ansible-playbook -i localhost.ini localhost.yml
 - hosts: localhost
   gather_facts: no
   vars:
     known_hosts_file: "~/.ssh/known_hosts"
-    #ssh_key_find_command: "ssh-keygen -f {{ known_hosts_file }} -F"
-    #ssh_key_del_command: "ssh-keygen -R"
-    #ssh_key_add_command: "ssh-keyscan -T 1"
-    # target nodes
-    subnet: "192.168.22."
+    target_subnet: "192.168.22."
     host_start: 51
     host_end: 51
-    #target_hosts:
-    #  - 192.168.22.51
   tasks:
     - name: Make sure the known hosts file exists
       file: "path={{ known_hosts_file }} state=touch"
@@ -32,7 +26,7 @@
       with_sequence:
         start={{host_start}}
         end={{host_end}}
-        format={{subnet}}%i
+        format={{target_subnet}}%i
       register: target_hosts
 
     - name: Remove SSH fingerprints if they exist
@@ -49,67 +43,4 @@
         host="{{item}}"
         key="{{ lookup('pipe', 'ssh-keyscan -H -T 1 {{item}}') }}"
       with_items: "{{ target_hosts.results | map(attribute='item') | list }}"
-
-
-
-    # BIG MESS:
-
-    #- name: Check for host collisions
-    #  shell: "{{ ssh_key_find_command }} {{ item.item }}"
-    #  with_items: "{{ target_hosts.results }}"
-    #  register: known_hosts_results
-    #
-    #- name: my debug 2
-    #  shell: echo "{{ item.item }}"
-    #  with_items: "{{ know_hosts_results.results }}"
-    #
-    #- name: Check for host collisions
-    #  shell: "{{ ssh_key_find_command }} {{ item }}"
-    #  with_items: "{{ target_hosts.results | map(attribute='item') | list }}"
-    #  register: known_hosts_results
-    #  ignore_errors: yes
-
-    #- name: my debug
-    #  shell: echo "{{ item }}"
-    #  with_items: "{{ known_hosts_results.results | map(attribute='item') | list }}"
-
-
-
-    #- name: dummy task to build list of nodes for ssh fingerprint
-    #  file: path="/" state=directory
-    #  register: target_hosts
-    #  with_sequence:
-    #    start={{host_start}}
-    #    end={{host_end}}
-    #    format={{subnet}}%i
-
-    #- name: my debug
-    #  #shell: echo "{{ item }}"
-    #  shell: "mkdir -p /tmp/tmp/{{ item }}"
-    #  with_items: "{{ target_hosts.results | map(attribute='item') | list }}"
-
-    #- name: Check for host collisions
-    #  shell: "{{ ssh_key_find_command }} {{ item.item }}"
-    #  with_items: "{{ target_hosts.results }}"
-    #  register: known_hosts_results
-    #  ignore_errors: yes
-    #
-    #- name: my debug 2
-    #  shell: echo "{{ item.item }}"
-    #  with_items: "{{ know_hosts_results.results }}"
-
-    #- name: Remove collisions
-    #  shell: "{{ ssh_key_del_command }} {{ item.item }} >> {{ known_hosts_file }}"
-    #  with_items: "{{ known_hosts_results.results }}"
-    #
-    #- name: Scan SSH public key
-    #  shell: "{{ ssh_key_add_command }} {{ item }} >> {{ known_hosts_file }}"
-    #  with_items: "{{ target_hosts }}"
-
-    #- debug: msg="{{item.item}}"
-      #with_items: "{{target_hosts.results}}"
-    #
-    #- debug: msg={{ssh_key_find_command}}
-    #- debug: msg={{item}}
-      #with_items: "{{ target_hosts }}"
 
