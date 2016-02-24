@@ -1,0 +1,34 @@
+---
+# Install latest version of nginx package.
+# Cache is not updated here since that is done in the common role.
+- name: install latest nginx
+  apt: name=nginx state=latest update_cache=no
+  notify: restart nginx
+
+# Enable nginx to start at boot.
+- name: enable nginx
+  service: name=nginx enabled=yes
+
+# Configure nginx settings.
+- name: configure nginx settings
+  template: src=nginx.conf.j2 dest=/etc/nginx/nginx.conf
+  notify: restart nginx
+
+# Configure nginx websites.
+- name: configure nginx websites
+  template: src=sites-available_default.j2 dest=/etc/nginx/sites-available/default
+  notify: restart nginx
+
+########################
+# Copy the website.
+# This could also include downloading from a git repo.
+########################
+- name: create website root dir
+  file: path={{ website_root }} state=directory mode=755
+- name: copy website about
+  copy: src=humans.txt dest={{ website_root }}/humans.txt
+  notify: restart nginx
+- name: copy website index
+  template: src=index.html.j2 dest={{ website_root }}/index.html
+  notify: restart nginx
+

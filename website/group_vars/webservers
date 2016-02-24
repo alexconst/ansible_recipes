@@ -1,0 +1,4 @@
+---
+website_root: /var/www/mysite
+website_port: 80
+

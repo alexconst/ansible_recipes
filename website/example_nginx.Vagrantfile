@@ -11,7 +11,7 @@ Vagrant.configure(2) do |config|
   config.vm.hostname = "ansible-nginx"
 
   # Message shown on vagrant up
-  config.vm.post_up_message = ""
+  config.vm.post_up_message = "After provisioning check the website at http://localhost:8080/"
 
   # Assign a static IP to the guest
   config.vm.network "private_network", ip: "192.168.22.51"

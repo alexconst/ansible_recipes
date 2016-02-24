@@ -1,0 +1,5 @@
+---
+# Use the apt module to: update package list, but don't upgrade the system
+- name: update package listing cache
+  apt: update_cache=yes upgrade=no cache_valid_time=1800
+

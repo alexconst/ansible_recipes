@@ -1,0 +1,10 @@
+<html>
+<p>webserver <b>{{ ansible_hostname }}</b>:</p>
+<p style="text-indent: 5em;">system: {{ ansible_lsb.description }} running kernel {{ ansible_kernel }}</p>
+<p style="text-indent: 5em;">CPU: {{ ansible_processor_vcpus }} vCPUs at {{ ansible_processor[1] }}</p>
+<p style="text-indent: 5em;">RAM: {{ ansible_memtotal_mb }} MiB</p>
+<p style="text-indent: 5em;">disk: {{ (ansible_mounts[0].size_total/1024/1024/1024)|int }} GiB</p>
+<p style="text-indent: 5em;">eth0: {{ ansible_eth0.ipv4.address }}</p>
+<p style="text-indent: 5em;">eth1: {{ ansible_eth1.ipv4.address }}</p>
+</html>
+
