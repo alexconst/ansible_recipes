@@ -20,7 +20,7 @@
   tasks:
     - name: Check if the known hosts file exists
       file: "path={{ known_hosts_file }} state=file"
-      # Save the task output/report/log to a variable
+      # Save the task output/report/log to a register
       register: file_check
       # We ignore errors here because we'll handle them in the next task
       ignore_errors: true
@@ -30,7 +30,7 @@
       # Use Jinja2 template filters to check if the field 'failed' exists
       when: file_check | failed
 
-      # Given that we'll re-use the list it's convenient to save it to a register
+      # Don't Repeat Yourself. Save the target hosts list to a register
     - name: Dummy task to build list of nodes for ssh fingerprint
       assert: { that: "'a' == 'a'" }
       # create a custom sequence and save it to register target_hosts
