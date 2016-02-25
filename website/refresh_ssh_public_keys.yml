@@ -2,9 +2,9 @@
 # This playbook refreshes local SSH key fingerprints. Useful when using Vagrant.
 #
 # To run the playbook on your localhost:
-#   ansible-playbook localhost.yml
+#   ansible-playbook refresh_ssh_public_keys.yml
 # Or to avoid any warnings:
-#   ansible-playbook -i localhost.ini localhost.yml
+#   ansible-playbook -i localhost.ini refresh_ssh_public_keys.yml
 #
 # NOTE: this should be used only in a trusted local environment. Otherwise you
 # may be making yourself vulnerable to MitM attacks.
