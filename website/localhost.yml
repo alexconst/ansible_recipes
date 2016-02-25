@@ -1,6 +1,5 @@
 ---
-# This playbook refreshes local SSH key fingerprints, that keep changing when
-# using Vagrant environments.
+# This playbook refreshes local SSH key fingerprints. Useful when using Vagrant.
 #
 # To run the playbook on your localhost:
 #   ansible-playbook localhost.yml
@@ -10,23 +9,31 @@
 # NOTE: this should be used only in a trusted local environment. Otherwise you
 # may be making yourself vulnerable to MitM attacks.
 #
-# NOTE: this could now be simplified into a single task, but considering the
-# iteration that went on this, simple is better than smart (and some nice tricks
-# would be lost in the process as well).
-#
 - hosts: localhost
   gather_facts: no
   vars:
     known_hosts_file: "~/.ssh/known_hosts"
+    # Only hosts in this range will be updated:
     target_subnet: "192.168.22."
     host_start: 50
     host_end: 59
   tasks:
-    - name: Make sure the known hosts file exists
-      file: "path={{ known_hosts_file }} state=touch"
+    - name: Check if the known hosts file exists
+      file: "path={{ known_hosts_file }} state=file"
+      # Save the task output/report/log to a variable
+      register: file_check
+      # We ignore errors here because we'll handle them in the next task
+      ignore_errors: true
 
+    - name: Create the known hosts file when not found
+      file: "path={{ known_hosts_file }} state=touch"
+      # Use Jinja2 template filters to check if the field 'failed' exists
+      when: file_check | failed
+
+      # Given that we'll re-use the list it's convenient to save it to a register
     - name: Dummy task to build list of nodes for ssh fingerprint
       assert: { that: "'a' == 'a'" }
+      # create a custom sequence and save it to register target_hosts
       with_sequence:
         start={{host_start}}
         end={{host_end}}
@@ -38,9 +45,14 @@
         state=absent
         path="{{known_hosts_file}}"
         host="{{item}}"
+        # Preprocess data in register, using Jinja2 templates, in order to allow
+        # easy access via {{item}} instead of {{item.item}}
       with_items: "{{ target_hosts.results | map(attribute='item') | list }}"
 
     - name: Add SSH fingerprints if the node is online
+      # This task makes use of the lookup module which allows accessing data from
+      # outside sources. In particular it uses the pipe lookup which returns the
+      # raw output of the specified ssh-keyscan command.
       known_hosts:
         state=present
         path="{{known_hosts_file}}"
