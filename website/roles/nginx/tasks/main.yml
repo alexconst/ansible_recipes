@@ -25,7 +25,7 @@
 ########################
 - name: create website root dir
   file: path={{ website_root }} state=directory mode=755
-- name: copy website about
+- name: copy a file
   copy: src=humans.txt dest={{ website_root }}/humans.txt
   notify: restart nginx
 - name: copy website index
