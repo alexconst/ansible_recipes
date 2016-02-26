@@ -1,0 +1,10 @@
+---
+- name: deploy loadbalancer
+  hosts: lbservers
+  become: yes
+  become_method: sudo
+
+  roles:
+    - common
+    - haproxy
+

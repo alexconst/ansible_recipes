@@ -1,0 +1,21 @@
+---
+# Install latest version of haproxy package.
+# Cache is not updated here since that is done in the common role.
+- name: install latest haproxy
+  apt: name=haproxy state=latest update_cache=no
+  notify: restart haproxy
+
+# Enable haproxy to start at boot.
+- name: enable haproxy
+  service: name=haproxy enabled=yes
+
+# Configure haproxy settings.
+- name: configure haproxy settings
+  template: src=haproxy.cfg.j2 dest=/etc/haproxy/haproxy.cfg
+  # we need to restart rsyslog to enable haproxy logging to /var/log/haproxy.log
+  # https://serverfault.com/questions/645924/haproxy-logging-to-syslog/751631#751631
+  notify:
+    - restart rsyslog
+    - restart haproxy
+
+

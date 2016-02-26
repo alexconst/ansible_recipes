@@ -1,0 +1,6 @@
+---
+backend_name: backend_lbservers
+daemon_name: proxy_daemon
+balance: roundrobin
+lb_listen_port: 80
+
