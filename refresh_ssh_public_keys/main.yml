@@ -57,7 +57,7 @@
         state=present
         path="{{known_hosts_file}}"
         host="{{item}}"
-        key="{{ lookup('pipe', 'ssh-keyscan -H -T 1 {{item}}') }}"
+        key="{{ lookup('pipe', 'ssh-keyscan -H -T 3 {{item}}') }}"
       with_items: "{{ target_hosts.results | map(attribute='item') | list }}"
       ignore_errors: yes
 
