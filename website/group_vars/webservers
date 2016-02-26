@@ -1,4 +1,3 @@
 ---
 website_root: /var/www/mysite
-website_port: 80
-
+# website_port is declared in the all group_vars since it's also used by the LB

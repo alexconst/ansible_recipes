@@ -12,15 +12,21 @@ http {
         ##
         # Basic Settings
         ##
-        sendfile off;
-        # sendfile disabled because of virtualbox bug
-        # https://www.vagrantup.com/docs/synced-folders/virtualbox.html
         tcp_nopush on;
         tcp_nodelay on;
         keepalive_timeout 65;
         types_hash_max_size 2048;
         include /etc/nginx/mime.types;
         default_type application/octet-stream;
+
+        # Disable cache (useful when testing)
+        # sendfile is also disabled because of virtualbox bug:
+        # https://www.vagrantup.com/docs/synced-folders/virtualbox.html
+        add_header Cache-Control private;
+        add_header Last-Modified "";
+        sendfile off;
+        expires off;
+        etag off;
 
         ##
         # Logging Settings
