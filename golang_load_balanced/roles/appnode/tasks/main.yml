@@ -1,0 +1,45 @@
+---
+###################################
+# PACKAGES
+###################################
+- name: update package listings
+  apt: update_cache=yes upgrade=no cache_valid_time=1800
+
+- name: install golang
+  apt: pkg={{item}} state=latest
+  with_items:
+    golang
+
+###################################
+# DEPLOY APP
+###################################
+- name: create target dir for golang app
+  file: path={{website_root}}/{{app_name}}/  state=directory mode=755
+
+- name: copy app source code
+  copy: src={{app_name}}/{{app_name}}.go dest={{website_root}}/{{app_name}}/
+  register: result
+
+- name: build golang app
+  shell: go build
+  args:
+    chdir: "{{ website_root }}/{{ app_name}}/"
+  notify: restart app
+  when: result | changed
+
+####################################
+# ENABLE APP SERVER
+####################################
+- name: copy the systemd unit
+  template: src={{app_service}} dest=/etc/systemd/system/
+  register: result
+
+- name: systemd unit refresh
+  shell: systemctl daemon-reload
+  notify: restart app
+  when: result | changed
+
+- name: run golang app
+  service: name={{app_service}} enabled=yes
+  notify: restart app
+

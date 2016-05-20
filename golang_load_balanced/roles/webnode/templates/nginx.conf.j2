@@ -1,0 +1,37 @@
+# {{ ansible_managed }}
+
+user www-data;
+worker_processes auto;
+pid /run/nginx.pid;
+
+events {
+        worker_connections 768;
+        # multi_accept on;
+}
+
+http {
+    upstream webapp {
+        ##% for host in groups['appnodes'] %#
+        #    server ## hostvars[host]['ansible_eth1'].ipv4.address ##:## listen_port ##;
+        ##% endfor %#
+        # The above would require fact caching enabled, however Vagrant messes this up,
+        # leaving with the only solution the use of redis on the host, which may or may
+        # not be a problem, so given the nature of this demo we'll use hardcoded IPs
+        # (could have also used a hosts file)
+
+        server 192.168.25.51:{{ listen_port }};
+        server 192.168.25.52:{{ listen_port }};
+    }
+
+    server {
+        listen {{ listen_port }};
+
+        location / {
+            proxy_pass http://webapp;
+        }
+    }
+
+    access_log /var/log/nginx/access.log;
+    error_log /var/log/nginx/error.log;
+}
+

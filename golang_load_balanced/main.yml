@@ -1,0 +1,15 @@
+---
+- name: deploy application nodes
+  hosts: appnodes
+  become: yes
+  become_method: sudo
+  roles:
+    - appnode
+
+- name: deploy lb web node
+  hosts: webnodes
+  become: yes
+  become_method: sudo
+  roles:
+    - webnode
+

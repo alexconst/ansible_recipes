@@ -1,0 +1,59 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure(2) do |config|
+
+  # Choose a box. Ubuntu comes with VirtualBox guest tools already installed
+  #config.vm.box = "debian/jessie64"
+  config.vm.box = "ubuntu/wily64"
+
+  # Set up hostname
+  config.vm.hostname = "appnode"
+
+  # Message shown on vagrant up
+  config.vm.post_up_message = "After provisioning check the website at http://localhost:8484/"
+
+
+  # Share an additional folder with the guest VM.
+  #host_folder = ENV['HOME'] + "/share_vagrant"
+  #guest_folder = "/shared/"
+  #config.vm.synced_folder host_folder, guest_folder
+
+  # Fine tune the virtualbox VM
+  config.vm.provider "virtualbox" do |vb|
+    vb.customize [
+      "modifyvm", :id,
+      "--cpus", "2",
+      "--cpuexecutioncap", "50",
+      "--memory", "512",
+    ]
+  end
+
+  # app nodes
+  (1..2).each do |i|
+    config.vm.define "appnode#{i}" do |app|
+      app.vm.hostname = "appnode#{i}"
+      # Assign a static IP to the guest
+      app.vm.network :private_network, ip: "192.168.25.5#{i}"
+      # Create a forwarded port mapping
+      app.vm.network "forwarded_port", guest: 8484, host: "808#{i}"
+    end
+  end
+
+  # lb webnode
+  config.vm.define "lb" do |lb|
+    lb.vm.hostname = "webnode"
+    # Assign a static IP to the guest
+    lb.vm.network :private_network, ip: "192.168.25.50"
+    # Create a forwarded port mapping
+    lb.vm.network "forwarded_port", guest: 8484, host: "8484"
+  end
+
+  # provisioning using Ansible
+  config.vm.provision "ansible" do |ansible|
+    ansible.playbook = "main.yml"
+    ansible.inventory_path = "hosts.ini"
+  end
+end
+
+

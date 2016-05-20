@@ -1,0 +1,10 @@
+[Unit]
+Description=Golang App Server
+
+[Service]
+Restart=on-failure
+ExecStart="{{ website_root }}/{{ app_name }}/{{ app_name }}"
+
+[Install]
+WantedBy=multi-user.target
+
